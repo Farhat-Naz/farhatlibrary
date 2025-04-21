@@ -1,9 +1,9 @@
 from pickletools import genops
-import sreamlit as st
+import streamlit as st
 import pandas as pd
 import json
 import os
-from datatime import datetime
+from datetime import datetime
 import time
 import random
 import plotly.express as px
@@ -92,11 +92,11 @@ st.markdown("""
             border-radius: 0.375rem;
         }
 </style>
-"""), unsafe_allow_html=True
+""", unsafe_allow_html=True)
 
 def load_lottieur(url):
     try:
-        r=request.get(url)
+        r=requests.get(url)
         if r.status_code != 200:
             return None
         return r.json()
@@ -106,11 +106,11 @@ def load_lottieur(url):
 if 'library' not in st.session_state:
     st.session_state.library = []
 if 'search_result' not in st.session_state:
-    st.session.state.search_result = []
-if 'book_added' not in st.session.state:
-    st.session_state.book_added = False;
-if 'book_removed' not in st.session.state:    
-    st.session_sate.book_removed = false;
+    st.session_state.search_result = []
+if 'book_added' not in st.session_state:
+    st.session_state.book_added = False
+if 'book_removed' not in st.session_state:    
+    st.session_state.book_removed = False
 if 'current_view' not in st.session_state:
     st.session_state.current_view = "library"
     
@@ -129,29 +129,29 @@ def load_library():
 def save_library():
     try:
         with open('library.json', 'w') as file:
-            json.dump(st.session_stae.library, file)
+            json.dump(st.session_state.library, file)
             return True
     except Exception as e:
         st.error(f"Error loading library: (e)")
         return False 
     
 # add a book to library
-def add_bood(title, author, publication_year, genre, read_status):
-    book=(
-        'title': title, 
-        'authoor':autho,
-        'publication_year':publation_year,
+def add_book(title, author, publication_year, genre, read_status):
+    book={
+        'title':title,
+        'author':author,
+        'publication_year':publication_year,
         'genre': genre,
-        'read_status'=:ead_status,
-        'added_date': datetime.now().strftime("%y-%m-%d %M:%H:%S")
-    )
+        'read_status':read_status,
+        'added_date': datetime.now().strftime("%y-%m-%d %M:%H:%S"),
+    }
     st.session_state.library.append(book)
     save_library()
     st.session_state.book_added = True
     time.sleep(0.5) #maintain deley
     
 def remove_book(index):
-    if 0 <= index < len(st.session_sate.library):
+    if 0 <= index < len(st.session_state.library):
         st.session_state.book_removed = True
         return True
     return False
@@ -166,7 +166,7 @@ def search_books(search_term, search_by):
             result.append(book)
         elif search_by == "Genre" and search_term in book['author'].lower():
             result.append(book)            
-    st.session_state.search_results = results
+    st.session_state.search_results = result
     #calculate liberary states
     
 def get_library_stats():
@@ -206,7 +206,7 @@ def get_library_stats():
     'percent_read': percent_read,
     'generes' :generes,
     'authors' :authors,
-    'decades' :decades
+    'decades' :decades,
 }              
     
 def create_visulations(stats):
@@ -225,17 +225,18 @@ def create_visulations(stats):
         st.plotly_chart(fig_read_status, use_container_width = True)
         #bar chart genres
         if stats['genres']:
-            genres_df = pd.DataFrame((
+            genres_df = pd.DataFrame({
                 
                 'Genre': list(stats['genres'].keys()),
-                'Count' : list(stats['genres'].values())
-            ))
+                'Count' : list(stats['genres'].values()),
+            })
             fig_genres = px.bar(
                 genres_df,
+                
                 x='Genre',
                 y='Count',
                 color= 'Count',
-                color_continous_scale=px.colors.sequential.Blues[]
+                color_continous_scale=px.colors.sequential.Blues
             )
             fig_genres.update_layout(
                 title_text = 'Book by publication genres',
@@ -245,16 +246,16 @@ def create_visulations(stats):
             )
             st.plotly_chart(fig_decades, use_container_width=True)
         if stats['decades']:
-            decades_df=pd.DataFrame((
-                'Decade':[f"(decade)s" for decade in sats['decades'].keys()],
-                "count': list(stats["decades'].values())"
-            ))  
+            decades_df=pd.DataFrame({
+                'Decade':[f"(decade)s" for decade in stats['decades'].keys()],
+                'count': list(stats['decades'].values()),
+            })  
             fig_decades = px.line(
                 decades_df,
                 x='Decade',
-                y='Count'
+                y='Count',
                 markers=True,
-                line_shape='spline'
+                line_shape='spline',
             )  
             fig_decades.update_layout(
                 title_text = 'Book by publication decades',
@@ -269,25 +270,46 @@ def create_visulations(stats):
             
 load_library()
 st.sidebar.markdown("<h1 style ='text-alighn: center;'> Navigation</h1>", unsafe_allow_html = True)
-lottle_book = load_lottieurl("https://assests9.lottiefiles.com/temp/1f20_avafin.json")
-if lottie_book:
+lottle_book = load_lottieur("https://lottie.lottiefiles.com/temp/1f20_avafin.json")
+if lottle_book:
    with st.sidebar:
-        st.lotties(lottie_book, height=200, key="book_animation")
-nav_options=st.sidebar.radion(
-    "Choose an option:,"
-    ["view library","Search book", "Add Book", "Library Statistic"]
-)            
-if nav_options == "view library":
-   st.session_state.current_view = 'library'
-elif nav_options == "Add bool":
-   st.session_state.current_view = 'Add'
+        st.lottie(lottle_book, height=200, key="book_animation")
+nav_options = st.sidebar.radio(
+    "Choose an option:",
+    ["View Library", "Search Book", "Add Book", "Library Statistics"]
+)
+
+if nav_options == "View Library":
+    st.session_state.current_view = 'library'
+elif nav_options == "Add Book":  # Corrected "Add book" to "Add Book" for consistency
+    st.session_state.current_view = 'add_book' # More descriptive key
 elif nav_options == "Search Book":
-   st.session_state.current_view = 'Search'
+    st.session_state.current_view = 'search' # More descriptive key
 elif nav_options == "Library Statistics":
-   st.session_state.current_view = "Stats"   
+    st.session_state.current_view = "stats"   # More descriptive key
+
+# --- Display Content Based on Current View ---
+if 'current_view' in st.session_state:
+    if st.session_state.current_view == 'library':
+        st.subheader("Your Library")
+        # Add code to display the library contents
+    elif st.session_state.current_view == 'search':
+        st.subheader("Search for Books")
+        # Add code for the search functionality
+    elif st.session_state.current_view == 'add_book':
+        st.subheader("Add a New Book")
+        # Add code for the book addition form
+    elif st.session_state.current_view == 'stats':
+        st.subheader("Library Statistics")
+        # Add code to display library statistics
+    else:
+        st.subheader("Welcome!") # Default view
+else:
+    st.subheader("Welcome!") # Initial view before any selection
+ 
    
    
-st.markdown("<h1 class='main_header'> Personal Library Manager </h1>" unsafe_allow_html=True)
+st.markdown("<h1 class='main_header'> Personal Library Manager </h1>", unsafe_allow_html=True)
 if st.session_state.current_view == "Add":
     st.markdown("<h2 class = 'sub-header'> Add  a New Book</h2>", unsafe_allow_html=True)
     
@@ -353,7 +375,7 @@ if st.session_state.current_view == "Add":
              st.markdown("<h2 class ='sub-header'>Search Books</h2>",unsafe_allow_html=True)     
              
              search_by = st.selectbox("Search by:", ["Title", "Author", "Genre"])
-             search_tem = st.text_input("Enter search term:")
+             search_term = st.text_input("Enter search term:")
              
              if st.button("Search", use_container_width=False):
                  
@@ -364,7 +386,7 @@ if st.session_state.current_view == "Add":
                          search_books(search_term, search_by)
              if hasattr(st.session_state, 'search_results'):
                 if st.session_state.search_results:
-                   st.markdown(f"<h3> Found {len(st.session_state.search_results:</h3>", unsafe_allow_html=True)          
+                   st.markdown(f"<h3> Found {len(st.session_state.search_results)}</h3>", unsafe_allow_html=True)          
                         
                    for i, book in enumerate(st.session_state.search_result):
                        st.markdown(f"""
@@ -393,7 +415,7 @@ elif st.session_state.current_view=="status":
          with col2:
               st.metric( "Book Read", stats['read_books'])      
          with col3:
-              st.metric("Percentage Read", f"{stats['percentage_read']%")      
+              st.metric("Percentage Read", f"{stats['percentage_read']}%")      
          create_visulations()
          
          if stats['authors']:
@@ -401,7 +423,8 @@ elif st.session_state.current_view=="status":
              top_authors = dict(list(stats['authors'].items()[:5]))       
          
              for author, count in top_authors.items():
-                 st.markdown(f"**{author}**: {count} books's' if count > 1 else ''}")
+                 st.markdown(f"**{author}**: {count} books's' if count > 1 else ''")
                  st.markdown("----")
                  st.markdown("copyright @ 2025 Farhat Naz Personal Library Manager", unsafe_allow_html=True)                    
+                                              
                                
